@@ -1,6 +1,6 @@
 class Billing::Limiter
   include ActiveModel::Model
-  
+
   def initialize(team)
     @team = team
   end
@@ -11,16 +11,16 @@ class Billing::Limiter
   end
 
   def collection_for(model)
-    model.name.underscore.gsub("/", "_").pluralize.underscore.to_sym
+    model.name.underscore.tr("/", "_").pluralize.underscore.to_sym
   end
 
   def exists_count_for(model)
     @team.send(collection_for(model)).billable.count
   end
-  
+
   def usage_for(action, model, duration, interval)
-    @team.current_billing_usage_trackers.detect do |tracker| 
-      tracker.duration == duration && tracker.interval == interval 
+    @team.current_billing_usage_trackers.detect do |tracker|
+      tracker.duration == duration && tracker.interval == interval
     end&.usage&.dig(model.name, action.to_s.verb.conjugate(tense: :past))
   end
 
@@ -38,7 +38,7 @@ class Billing::Limiter
 
   def limits_for(action, model)
     # Collect any relevant limits from all active products.
-    current_products.map do |product| 
+    current_products.map do |product|
       limits = product.limits[model.name.underscore.pluralize]
       limits.each do |action, limit|
         limit["product_id"] = product.id
@@ -57,10 +57,8 @@ class Billing::Limiter
   def broken_hard_limits_for(action, model, count: 1)
     hard_limits = hard_limits_for(action, model).map do |limit|
       if (exhausted_usage = exhausted_usage_for(limit, action, model, count: count))
-        # We notate the action here because `:create` ends up aggregating broken limits for both `:create` and `:exist`.
+        # We notate the action here because `:create` ends up aggregating broken limits for both `:create` and `:have`.
         {action: action, usage: exhausted_usage, limit: limit}
-      else
-        nil
       end
     end.compact
 

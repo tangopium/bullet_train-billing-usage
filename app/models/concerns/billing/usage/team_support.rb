@@ -1,7 +1,7 @@
 module Billing::Usage::TeamSupport
   extend ActiveSupport::Concern
 
-  included do 
+  included do
     has_many :billing_usage_trackers, class_name: "Billing::Usage::Tracker", dependent: :destroy
   end
 

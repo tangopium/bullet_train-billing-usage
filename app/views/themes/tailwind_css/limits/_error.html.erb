@@ -6,7 +6,7 @@
 <% messaging = capture do %>
   <% current_limits.broken_hard_limits_for(:create, model, count: count).each_with_index do |limit, index| %>
     <% show_upgrade ||= limit.dig(:limit, "upgradable") %>
-    <% if limit[:action] == :exist %>
+    <% if limit[:action] == :have %>
       <% if count > 0 %>
         You 
         <% if index > 0 %>
