@@ -25,7 +25,7 @@ class Billing::Limiter
   end
 
   def exhausted_usage_for(limit, action, model, count: 0)
-    current_count = if action == :exist
+    current_count = if action == :have
       exists_count_for(model)
     else
       usage_for(action, model, limit["duration"], limit["interval"])
@@ -66,7 +66,7 @@ class Billing::Limiter
 
     # If we're checking whether we can create something, we also need to check if it can exist.
     if action == :create
-      hard_limits += broken_hard_limits_for(:exist, model, count: count)
+      hard_limits += broken_hard_limits_for(:have, model, count: count)
     end
 
     hard_limits
@@ -79,6 +79,6 @@ class Billing::Limiter
 
   def exhausted?(model)
     return false unless billing_enabled?
-    broken_hard_limits_for(:exist, model, count: 0).any?
+    broken_hard_limits_for(:have, model, count: 0).any?
   end
 end
