@@ -3,7 +3,7 @@
 <% color ||= "red" %>
 <% cancel_path ||= nil %>
 
-<% if (!model.persisted?) && current_limits.can?(:create, model.class, count: count) %>
+<% if model.persisted? || current_limits.can?(:create, model.class, count: count) %>
   <%= yield %>
 <% else %>
   <%= render "shared/limits/error", action: :create, model: model.class, count: count, color: color, cancel_path: cancel_path %>
