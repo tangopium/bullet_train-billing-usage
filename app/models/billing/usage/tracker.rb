@@ -1,5 +1,12 @@
-class Billing::Usage::Tracker < ApplicationRecord
-  belongs_to :team
+class Billing::Usage::Tracker < BulletTrain::Billing::Usage.base_class.constantize
+  # e.g. `belongs_to :team`
+  belongs_to BulletTrain::Billing::Usage.parent_association
+
+  if ActiveRecord::Base.connection.adapter_name.downcase.include?("mysql")
+    after_initialize do
+      self.usage ||= {}
+    end
+  end
 
   def self.cycles
     # e.g. [[1, "day"], [5, "minutes"]]

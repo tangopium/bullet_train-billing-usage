@@ -1,12 +1,12 @@
 class Billing::Limiter
   include ActiveModel::Model
 
-  def initialize(team)
-    @team = team
+  def initialize(parent)
+    @parent = parent
   end
 
   def current_products
-    products = @team.billing_subscriptions.active.map(&:included_prices).flatten.map(&:price).map(&:product)
+    products = @parent.team.billing_subscriptions.active.map(&:included_prices).flatten.map(&:price).map(&:product)
     products.any? ? products : [Billing::Product.find(:free)]
   end
 
@@ -15,11 +15,11 @@ class Billing::Limiter
   end
 
   def exists_count_for(model)
-    @team.send(collection_for(model)).billable.count
+    @parent.send(collection_for(model)).billable.count
   end
 
   def usage_for(action, model, duration, interval)
-    @team.current_billing_usage_trackers.detect do |tracker|
+    @parent.current_billing_usage_trackers.detect do |tracker|
       tracker.duration == duration && tracker.interval == interval
     end&.usage&.dig(model.name, action.to_s.verb.conjugate(tense: :past))
   end
@@ -39,7 +39,7 @@ class Billing::Limiter
   def limits_for(action, model)
     # Collect any relevant limits from all active products.
     current_products.map do |product|
-      limits = product.limits[model.name.underscore.pluralize]
+      limits = product.respond_to?(:limits) ? (product.limits & [model.name.underscore.pluralize] || {}) : {}
       limits.each do |action, limit|
         limit["product_id"] = product.id
       end
