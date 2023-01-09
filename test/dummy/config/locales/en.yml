@@ -30,4 +30,8 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
-  hello: "Hello world"
+  billing/products:
+    basic:
+      name: "Basic"
+  billing/usage_helper_test/dummy_classes:
+    label: "Membership"
