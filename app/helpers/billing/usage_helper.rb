@@ -23,7 +23,7 @@ module Billing::UsageHelper
     introduction << "can't"
     introduction << (action == :have ? "add" : action)
     introduction << (count == 1 ? "a" : number_with_delimiter(count))
-    introduction << I18n.t("#{model.name.underscore.pluralize}.label").singularize.pluralize(count)
+    introduction << broken_hard_limits_model_name(model, count: count)
   end
 
   def broken_hard_limits_limit(model, limit)
@@ -33,13 +33,17 @@ module Billing::UsageHelper
     product_id = limit.dig(:limit, "product_id")
 
     limit = [number_with_delimiter(limit_count)]
-    limit << I18n.t("#{model.name.underscore.pluralize}.label").singularize.pluralize(limit_count)
+    limit << broken_hard_limits_model_name(model, count: limit_count)
     limit << "allowed by your"
     limit << I18n.t("billing/products.#{product_id}.name")
     limit << "account#{"." if interval.nil?}"
     limit << "in the current #{duration} #{interval.singularize} period." unless interval.nil?
 
     limit
+  end
+
+  def broken_hard_limits_model_name(model, count:)
+    I18n.t("#{model.name.underscore.pluralize}.label").singularize.pluralize(count)
   end
 
   def broken_hard_limits_usage(limit, count:)
