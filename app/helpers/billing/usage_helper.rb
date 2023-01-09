@@ -42,8 +42,11 @@ module Billing::UsageHelper
     limit << broken_hard_limits_model_name(model, count: limit_count)
     limit << "allowed by your"
     limit << I18n.t("billing/products.#{product_id}.name")
-    limit << "account#{"." if interval.nil?}"
-    limit << "in the current #{duration} #{interval.singularize} period." unless interval.nil?
+    if interval.nil?
+      limit << "account."
+    else
+      limit << "account in the current #{duration} #{interval.singularize} period."
+    end
 
     limit
   end
