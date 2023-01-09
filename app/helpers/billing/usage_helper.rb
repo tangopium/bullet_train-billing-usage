@@ -9,6 +9,12 @@ module Billing::UsageHelper
     end.flatten.join(" ")
   end
 
+  def broken_hard_limits_upgradable?(limiter, model, action: :create, count: 1)
+    limiter.broken_hard_limits_for(action, model, count: count).any? do |limit|
+      limit.dig(:limit, "upgradable")
+    end
+  end
+
   private
 
   def broken_hard_limits_introduction(model, limit, index:, count:)

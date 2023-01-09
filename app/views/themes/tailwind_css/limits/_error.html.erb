@@ -1,69 +1,17 @@
 <% model ||= form.object.class %>
 <% color ||= "red" %>
 <% cancel_path ||= nil %>
+<% action ||= :create %>
 
-<% show_upgrade = false %>
-<% messaging = capture do %>
-  <% current_limits.broken_hard_limits_for(:create, model, count: count).each_with_index do |limit, index| %>
-    <% show_upgrade ||= limit.dig(:limit, "upgradable") %>
-    <% if limit[:action] == :have %>
-      <% if count > 0 %>
-        You 
-        <% if index > 0 %>
-        also
-        <% end %>
-        can't add
-        <%= count == 1 ? "a" : number_with_delimiter(count) %>
-        <%= t("#{model.name.underscore.pluralize}.label").singularize.pluralize(count) %>
-        because you already have 
-        <%= number_with_delimiter(limit[:usage]) %> 
-        out of 
-      <% else %>
-        You've used <%= number_with_delimiter(limit[:usage]) %> of
-      <% end %>
-      <% limit_count = limit.dig(:limit, "count") %>
-      <%= number_with_delimiter(limit_count) %>
-      <%= t("#{model.name.underscore.pluralize}.label").singularize.pluralize(limit_count) %>
-      allowed by your 
-      <%=  %>
-      <%= t("billing/products.#{limit.dig(:limit, "product_id")}.name") %>
-      account.
-    <% else %>
-      You 
-      <% if index > 0 %>
-      also
-      <% end %>
-      can't <%= limit[:action] %>
-      <%= count == 1 ? "a" : number_with_delimiter(count) %>
-      <%= t("#{model.name.underscore.pluralize}.label").singularize.pluralize(count) %>
-      because you've already
-      <%= limit[:action].verb.conjugate(tense: :past) %> 
-      <%= number_with_delimiter(limit[:usage]) %> 
-      out of 
-      <% limit_count = limit.dig(:limit, "count") %>
-      <%= number_with_delimiter(limit_count) %>
-      <%= t("#{model.name.underscore.pluralize}.label").singularize.pluralize(limit_count) %>
-      allowed by your 
-      <%=  %>
-      <%= t("billing/products.#{limit.dig(:limit, "product_id")}.name") %>
-      account in the current 
-      <%= limit.dig(:limit, "duration") %>
-      <%= limit.dig(:limit, "interval").singularize %> 
-      period.
-    <% end %>
-    <% if false %>
-      You've used <strong><%= current_limits.count_for(model) %></strong> of the <strong><%= pluralize(current_limits.limit_for(model)["count"], t("#{model.name.underscore.pluralize}.label").singularize) %></strong> allowed on your <strong><%= current_limits.current_products.map { |product| t("billing/products.#{product.id}.name") }.to_sentence %></strong> account.
-    <% end %>
-  <% end %>
-<% end %>
+<% show_upgrade = broken_hard_limits_upgradable?(current_limits, model, action: action, count: count) %>
 
 <% upgrade_button = capture do %>
   <%= link_to "Upgrade", [:account, @team, :billing_subscriptions], target: "_blank", class: "button button-#{color}" %>
 <% end if show_upgrade %>
 
-<%= render "shared/alert", color: color do %> 
+<%= render "shared/alert", color: color do %>
   <div class="flex items-center">
-    <div class="flex-1"><%= messaging %></div>    
+    <div class="flex-1"><%= broken_hard_limits_message(current_limits, model, action: action, count: count) %></div>
     <div class="flex-0 pl-3">
       <div class="-mt-2 -mb-2 -mr-3 space-x">
         <%= upgrade_button %>
