@@ -49,9 +49,12 @@ class Billing::Limiter
     limits_for(action, model).select { |limit| limit["enforcement"] == enforcement }
   end
 
-  # Returns a copy of any limits that would be broken by an action (and the current usage).
   def broken_hard_limits_for(action, model, count: 1)
     broken_limits_for(action, model, enforcement: "hard", count: count)
+  end
+
+  def broken_soft_limits_for(action, model, count: 1)
+    broken_limits_for(action, model, enforcement: "soft", count: count)
   end
 
   def can?(action, model, count: 1)
@@ -59,9 +62,11 @@ class Billing::Limiter
     broken_hard_limits_for(action, model, count: count).empty?
   end
 
-  def exhausted?(model)
+  def exhausted?(model, enforcement = "hard")
     return false unless billing_enabled?
-    broken_hard_limits_for(:have, model, count: 0).any?
+
+    count = enforcement == "hard" ? 0 : 1
+    broken_limits_for(:have, model, enforcement: enforcement.to_s, count: count).any?
   end
 
   private
