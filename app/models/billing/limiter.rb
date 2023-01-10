@@ -45,25 +45,13 @@ class Billing::Limiter
     end.compact
   end
 
-  def enforced_hard_limits_for(action, model, enforcement:)
+  def enforced_limits_for(action, model, enforcement:)
     limits_for(action, model).select { |limit| limit["enforcement"] == enforcement }
   end
 
   # Returns a copy of any limits that would be broken by an action (and the current usage).
   def broken_hard_limits_for(action, model, count: 1)
-    hard_limits = enforced_hard_limits_for(action, model, enforcement: "hard").map do |limit|
-      if (exhausted_usage = exhausted_usage_for(limit, action, model, count: count))
-        # We notate the action here because `:create` ends up aggregating broken limits for both `:create` and `:have`.
-        {action: action, usage: exhausted_usage, limit: limit}
-      end
-    end.compact
-
-    # If we're checking whether we can create something, we also need to check if it can exist.
-    if action == :create
-      hard_limits += broken_hard_limits_for(:have, model, count: count)
-    end
-
-    hard_limits
+    broken_limits_for(action, model, enforcement: "hard", count: count)
   end
 
   def can?(action, model, count: 1)
@@ -77,6 +65,22 @@ class Billing::Limiter
   end
 
   private
+
+  def broken_limits_for(action, model, enforcement:, count: 1)
+    limits = enforced_limits_for(action, model, enforcement: enforcement).map do |limit|
+      if (exhausted_usage = exhausted_usage_for(limit, action, model, count: count))
+        # We notate the action here because `:create` ends up aggregating broken limits for both `:create` and `:have`.
+        {action: action, usage: exhausted_usage, limit: limit}
+      end
+    end.compact
+
+    # If we're checking whether we can create something, we also need to check if it can exist.
+    if action == :create
+      limits += broken_limits_for(:have, model, enforcement: enforcement, count: count)
+    end
+
+    limits
+  end
 
   def collection_for(model)
     model.name.underscore.tr("/", "_").pluralize.underscore.to_sym
