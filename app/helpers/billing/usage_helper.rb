@@ -31,7 +31,7 @@ module Billing::UsageHelper
   def broken_limits_introduction(model, limit, count:, index:)
     action = limit[:action]
 
-    return ["You've"] if !display_unavailable_action?(limit, count)
+    return ["You've"] unless display_unavailable_action?(limit, count)
 
     introduction = ["You"]
     introduction << "also" if index > 0
