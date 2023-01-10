@@ -1,0 +1,21 @@
+<% model ||= form.object.class %>
+<% color ||= "yellow" %>
+<% action ||= :create %>
+<% count ||= 1 %>
+
+<% show_upgrade = broken_soft_limits_upgradable?(current_limits, model, action: action, count: count) %>
+
+<% upgrade_button = capture do %>
+  <%= link_to "Upgrade", [:account, @team, :billing_subscriptions], target: "_blank", class: "button button-#{color}" %>
+<% end if show_upgrade %>
+
+<%= render "shared/alert", color: color do %>
+  <div class="flex items-center">
+    <div class="flex-1"><%= broken_soft_limits_message(current_limits, model, action: action, count: count) %></div>
+    <div class="flex-0 pl-3">
+      <div class="-mt-2 -mb-2 -mr-3 space-x">
+        <%= upgrade_button %>
+      </div>
+    </div>
+  </div>
+<% end %>
