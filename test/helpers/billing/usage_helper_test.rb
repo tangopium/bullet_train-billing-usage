@@ -57,6 +57,19 @@ class Billing::UsageHelperTest < ActiveSupport::TestCase
     end
   end
 
+  describe "#broken_hard_limits_upgradable" do
+    let(:controller) { DummyController.new }
+    let(:limits) { [{limit: {"upgradable" => true}}] }
+    let(:limiter) { Billing::Limiter.new(nil) }
+    let(:model) { DummyClass }
+
+    it "returns true if one of the limits is upgradable" do
+      limiter.stub :broken_hard_limits_for, limits do
+        assert controller.broken_hard_limits_upgradable?(limiter, model)
+      end
+    end
+  end
+
   describe "#broken_soft_limits_message" do
     let(:controller) { DummyController.new }
     let(:limits) { [{action: :have, usage: 3, limit: {"count" => 3, "enforcement" => "soft", "product_id" => "basic"}}] }

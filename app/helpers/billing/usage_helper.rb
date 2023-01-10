@@ -19,9 +19,11 @@ module Billing::UsageHelper
   end
 
   def broken_hard_limits_upgradable?(limiter, model, action: :create, count: 1)
-    limiter.broken_hard_limits_for(action, model, count: count).any? do |limit|
-      limit.dig(:limit, "upgradable")
-    end
+    limiter.broken_hard_limits_for(action, model, count: count).any? { |limit| limit_upgradable?(limit) }
+  end
+
+  def broken_soft_limits_upgradable?(limiter, model, action: :create, count: 1)
+    limiter.broken_soft_limits_for(action, model, count: count).any? { |limit| limit_upgradable?(limit) }
   end
 
   private
@@ -92,5 +94,9 @@ module Billing::UsageHelper
     enforcement = limit.dig(:limit, "enforcement")
 
     !(limit[:action] == :have && count.zero?) && enforcement == "hard"
+  end
+
+  def limit_upgradable?(limit)
+    limit.dig(:limit, "upgradable")
   end
 end
