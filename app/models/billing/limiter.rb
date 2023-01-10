@@ -10,10 +10,6 @@ class Billing::Limiter
     products.any? ? products : [Billing::Product.find(:free)]
   end
 
-  def collection_for(model)
-    model.name.underscore.tr("/", "_").pluralize.underscore.to_sym
-  end
-
   def exists_count_for(model)
     @parent.send(collection_for(model)).billable.count
   end
@@ -49,13 +45,13 @@ class Billing::Limiter
     end.compact
   end
 
-  def hard_limits_for(action, model)
-    limits_for(action, model).select { |limit| limit["enforcement"] == "hard" }
+  def enforced_hard_limits_for(action, model, enforcement:)
+    limits_for(action, model).select { |limit| limit["enforcement"] == enforcement }
   end
 
   # Returns a copy of any limits that would be broken by an action (and the current usage).
   def broken_hard_limits_for(action, model, count: 1)
-    hard_limits = hard_limits_for(action, model).map do |limit|
+    hard_limits = enforced_hard_limits_for(action, model, enforcement: "hard").map do |limit|
       if (exhausted_usage = exhausted_usage_for(limit, action, model, count: count))
         # We notate the action here because `:create` ends up aggregating broken limits for both `:create` and `:have`.
         {action: action, usage: exhausted_usage, limit: limit}
@@ -78,5 +74,11 @@ class Billing::Limiter
   def exhausted?(model)
     return false unless billing_enabled?
     broken_hard_limits_for(:have, model, count: 0).any?
+  end
+
+  private
+
+  def collection_for(model)
+    model.name.underscore.tr("/", "_").pluralize.underscore.to_sym
   end
 end
