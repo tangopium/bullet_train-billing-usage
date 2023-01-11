@@ -1,4 +1,4 @@
-module Billing::Usage::TeamSupport
+module Billing::Usage::HasTrackers
   extend ActiveSupport::Concern
 
   included do
