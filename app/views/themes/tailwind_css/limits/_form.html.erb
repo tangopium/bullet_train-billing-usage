@@ -4,6 +4,10 @@
 <% cancel_path ||= nil %>
 
 <% if model.persisted? || current_limits.can?(:create, model.class, count: count) %>
+  <% if current_limits.exhausted?(model.class, :soft) %>
+    <%= render "shared/limits/warning", model: model.class %>
+  <% end %>
+
   <%= yield %>
 <% else %>
   <%= render "shared/limits/error", action: :create, model: model.class, count: count, color: color, cancel_path: cancel_path %>

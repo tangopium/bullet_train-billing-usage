@@ -1,6 +1,13 @@
 <% model ||= @records.model %>
 <% color ||= "red" %>
 
+<% if current_limits.exhausted?(model, :soft) %>
+  <div class="pt-3">
+    <%= render "shared/limits/warning", model: model %>
+  </div>
+<% end %>
+
+
 <% if current_limits.exhausted?(model) %>
   <div class="pt-3">
     <%= render "shared/limits/error", model: model, color: color, count: 0 %>

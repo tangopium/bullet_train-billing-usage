@@ -1,9 +1,9 @@
 <% model ||= form.object.class %>
-<% color ||= "red" %>
-<% cancel_path ||= nil %>
+<% color ||= "yellow" %>
 <% action ||= :create %>
+<% count ||= 1 %>
 
-<% show_upgrade = broken_hard_limits_upgradable?(current_limits, model, action: action, count: count) %>
+<% show_upgrade = broken_soft_limits_upgradable?(current_limits, model, action: action, count: count) %>
 
 <% upgrade_button = capture do %>
   <%= link_to "Upgrade", [:account, @team, :billing_subscriptions], target: "_blank", class: "button button-#{color}" %>
@@ -11,11 +11,10 @@
 
 <%= render "shared/alert", color: color do %>
   <div class="flex items-center">
-    <div class="flex-1"><%= broken_hard_limits_message(current_limits, model, action: action, count: count) %></div>
+    <div class="flex-1"><%= broken_soft_limits_message(current_limits, model, action: action, count: count) %></div>
     <div class="flex-0 pl-3">
       <div class="-mt-2 -mb-2 -mr-3 space-x">
         <%= upgrade_button %>
-        <%= link_to "Dismiss", cancel_path, class: (show_upgrade ? "button-secondary button-#{color} button-increase-contrast" : "button button-#{color}") if cancel_path %>
       </div>
     </div>
   </div>
