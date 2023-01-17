@@ -22,7 +22,7 @@ module Billing::Limiter::Base
   def exhausted?(model, enforcement = "hard")
     return false unless billing_enabled?
 
-    count = enforcement == "hard" ? 0 : 1
+    count = enforcement.to_s == "hard" ? 0 : 1
     broken_limits_for(:have, model, enforcement: enforcement.to_s, count: count).any?
   end
 
@@ -63,6 +63,10 @@ module Billing::Limiter::Base
 
   def collection_for(model)
     model.name.underscore.tr("/", "_").pluralize.underscore.to_sym
+  end
+
+  def enforced_limits_for(action, model, enforcement:)
+    limits_for(action, model).select { |limit| limit["enforcement"].to_s == enforcement.to_s }
   end
 
   def exists_count_for(model)
