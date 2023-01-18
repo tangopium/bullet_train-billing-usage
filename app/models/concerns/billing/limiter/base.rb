@@ -22,8 +22,7 @@ module Billing::Limiter::Base
   def exhausted?(model, enforcement = "hard")
     return false unless billing_enabled?
 
-    count = enforcement.to_s == "hard" ? 0 : 1
-    broken_limits_for(:have, model, enforcement: enforcement.to_s, count: count).any?
+    broken_limits_for(:have, model, enforcement: enforcement.to_s, count: 1).any?
   end
 
   def hard_limits_for(action, model)
