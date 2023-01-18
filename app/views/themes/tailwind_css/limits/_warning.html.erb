@@ -1,6 +1,6 @@
 <% model ||= form.object.class %>
 <% color ||= "yellow" %>
-<% action ||= :create %>
+<% action ||= :have %>
 <% count ||= 1 %>
 
 <% show_upgrade = broken_soft_limits_upgradable?(current_limits, model, action: action, count: count) %>
