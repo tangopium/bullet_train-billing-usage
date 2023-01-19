@@ -1,7 +1,8 @@
 <% model ||= form.object.class %>
 <% color ||= "red" %>
+<% action ||= :have %>
+<% count ||= 1 %>
 <% cancel_path ||= nil %>
-<% action ||= :create %>
 
 <% show_upgrade = broken_hard_limits_upgradable?(current_limits, model, action: action, count: count) %>
 
