@@ -85,7 +85,7 @@ module Billing::Limiter::Base
   end
 
   def usage_for(action, model, duration, interval)
-    @parent.current_billing_usage_trackers.detect do |tracker|
+    @parent.billing_usage_trackers.current.detect do |tracker|
       tracker.duration == duration && tracker.interval == interval
     end&.usage&.dig(model.name, action.to_s.verb.conjugate(tense: :past))
   end
