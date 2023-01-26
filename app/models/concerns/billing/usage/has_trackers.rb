@@ -4,7 +4,7 @@ module Billing::Usage::HasTrackers
   included do
     has_many :billing_usage_trackers, class_name: "Billing::Usage::Tracker", dependent: :destroy do
       def current
-        Billing::Usage::Tracker.cycles.map do |cycle|
+        Billing::Usage::Tracker.cycles(proxy_association.owner).map do |cycle|
           duration, interval = cycle
 
           # This will grab the most recent tracker for this usage cycle.

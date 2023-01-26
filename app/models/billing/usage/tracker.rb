@@ -8,9 +8,9 @@ class Billing::Usage::Tracker < BulletTrain::Billing::Usage.base_class.constanti
     end
   end
 
-  # def self.cycles(tracker)
-  # Billing::ProductCatalog.new(tracker).cycles
-  def self.cycles
+  def self.cycles(_parent)
+    # Billing::ProductCatalog.new(parent).cycles
+
     # e.g. [[1, "day"], [5, "minutes"]]
     Billing::Product.all
       .map(&:limits).compact.flatten
