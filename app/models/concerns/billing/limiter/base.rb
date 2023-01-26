@@ -6,17 +6,21 @@ module Billing::Limiter::Base
     @parent = parent
   end
 
-  def can?(action, model, count: 1)
-    return true unless billing_enabled?
-    broken_hard_limits_for(action, model, count: count).empty?
-  end
-
   def broken_hard_limits_for(action, model, count: 1)
     broken_limits_for(action, model, enforcement: "hard", count: count)
   end
 
   def broken_soft_limits_for(action, model, count: 1)
     broken_limits_for(action, model, enforcement: "soft", count: count)
+  end
+
+  def can?(action, model, count: 1)
+    return true unless billing_enabled?
+    broken_hard_limits_for(action, model, count: count).empty?
+  end
+
+  def current_products
+    Billing::Usage::ProductCatalog.new(@parent).current_products
   end
 
   def exhausted?(model, enforcement = "hard")
