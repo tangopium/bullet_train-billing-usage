@@ -36,7 +36,7 @@ module Billing::Limiter::Base
   def limits_for(action, model)
     # Collect any relevant limits from all active products.
     current_products.map do |product|
-      limits = (product.respond_to?(:limits) && product.limits.present?) ? (product.limits[model.name.underscore.pluralize] || {}) : {}
+      limits = product.respond_to?(:limits) && product.limits.present? ? (product.limits[model.name.underscore.pluralize] || {}) : {}
       limits.each do |action, limit|
         limit["product_id"] = product.id
       end

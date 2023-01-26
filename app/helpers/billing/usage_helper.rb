@@ -10,7 +10,7 @@ module Billing::UsageHelper
   end
 
   def broken_soft_limits_message(limiter, model, action: :create, count: 1)
-    limiter.broken_soft_limits_for(action, model, count: count).each_with_index.reduce([]) do |message_parts, (limit, index)|
+    limiter.broken_soft_limits_for(action, model, count: count).each_with_index.each_with_object([]) do |message_parts, (limit, index)|
       message_parts << broken_limits_introduction(model, limit, index: index, count: count)
       message_parts << broken_soft_limits_usage(limit, count: count)
       message_parts << broken_limits_limit(model, limit)
@@ -51,12 +51,11 @@ module Billing::UsageHelper
     limit << broken_limits_model_name(model, count: limit_count)
     limit << "allowed by your"
     limit << I18n.t("billing/products.#{product_id}.name")
-    if interval.nil?
-      limit << "account."
+    limit << if interval.nil?
+      "account."
     else
-      limit << "account in the current #{duration} #{interval.singularize} period."
+      "account in the current #{duration} #{interval.singularize} period."
     end
-
     limit
   end
 
@@ -69,10 +68,10 @@ module Billing::UsageHelper
 
     usage = []
 
-    if action == :have
-      usage << (count.zero? ? "used" : "because you already have")
+    usage << if action == :have
+      (count.zero? ? "used" : "because you already have")
     else
-      usage << "because you've already #{action.verb.conjugate(tense: :past)}"
+      "because you've already #{action.verb.conjugate(tense: :past)}"
     end
 
     usage << number_with_delimiter(limit[:usage])
