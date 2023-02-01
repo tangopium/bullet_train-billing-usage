@@ -4,7 +4,7 @@ module Billing::Usage
   end
 
   def self.trackers
-    ApplicationRecord.descendants.map do |klass|
+    ApplicationRecord.descendants.select do |klass|
       klass if klass.include?(Billing::Usage::HasTrackers)
     end.compact
   end
