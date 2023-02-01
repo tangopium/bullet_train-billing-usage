@@ -10,7 +10,7 @@ module Billing::UsageHelper
   end
 
   def broken_soft_limits_message(limiter, model, action: :create, count: 1)
-    limiter.broken_soft_limits_for(action, model, count: count).each_with_index.each_with_object([]) do |message_parts, (limit, index)|
+    limiter.broken_soft_limits_for(action, model, count: count).each_with_index.each_with_object([]) do |(limit, index), message_parts|
       message_parts << broken_limits_introduction(model, limit, index: index, count: count)
       message_parts << broken_soft_limits_usage(limit, count: count)
       message_parts << broken_limits_limit(model, limit)
