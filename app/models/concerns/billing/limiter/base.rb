@@ -36,7 +36,7 @@ module Billing::Limiter::Base
   def limits_for(action, model)
     # Collect any relevant limits from all active products.
     current_products.map do |product|
-      limits = product.respond_to?(:limits) && product.limits.present? ? (product.limits[model.name.underscore.pluralize] || {}) : {}
+      limits = product.respond_to?(:limits) && product.limits.present? ? (product.limits[limit_key(model)] || {}) : {}
       limits.each do |action, limit|
         limit["product_id"] = product.id
       end
@@ -65,7 +65,7 @@ module Billing::Limiter::Base
   end
 
   def collection_for(model)
-    model.name.underscore.tr("/", "_").pluralize.underscore.to_sym
+    limit_key(model).underscore.to_sym
   end
 
   def enforced_limits_for(action, model, enforcement:)
@@ -88,9 +88,13 @@ module Billing::Limiter::Base
     current_count + count > limit["count"] ? current_count : nil
   end
 
+  def limit_key(model)
+    model.to_s.underscore.tr("/", "_").pluralize
+  end
+
   def usage_for(action, model, duration, interval)
     @parent.billing_usage_trackers.current.detect do |tracker|
       tracker.duration == duration && tracker.interval == interval
-    end&.usage&.dig(model.name, action.to_s.verb.conjugate(tense: :past))
+    end&.counts&.for(action.to_s.verb.conjugate(tense: :past), model)&.count
   end
 end

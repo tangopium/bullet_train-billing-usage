@@ -1,7 +1,12 @@
 class Billing::Usage::Tracker < BulletTrain::Billing::Usage.base_class.constantize
   # e.g. `belongs_to :team`
   belongs_to BulletTrain::Billing::Usage.parent_association
-  has_many :counts, dependent: :destroy
+
+  has_many :counts, dependent: :destroy do
+    def for(action, model)
+      order(created_at: :desc).find_by(action: action, name: model.to_s)
+    end
+  end
 
   if ActiveRecord::Base.connection.adapter_name.downcase.include?("mysql")
     after_initialize do
