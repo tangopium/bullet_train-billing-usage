@@ -21,11 +21,6 @@ class Billing::Usage::Tracker < BulletTrain::Billing::Usage.base_class.constanti
   def track(action, model, count)
     count_id = counts.find_or_create_by(action: action, name: model.to_s).id
     Billing::Usage::Count.update_counters(count_id, count: count, touch: true)
-
-    usage[model.name] ||= {}
-    usage[model.name][action.to_s] ||= 0
-    usage[model.name][action.to_s] += count
-    save
   end
 
   def cycle_as_needed
