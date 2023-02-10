@@ -8,5 +8,7 @@ class CreateBillingUsageCounts < ActiveRecord::Migration[7.0]
 
       t.timestamps
     end
+
+    add_index :billing_usage_counts, [:action, :name, :tracker_id], unique: true
   end
 end
