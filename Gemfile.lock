@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bullet_train-billing-usage (1.0.4)
+    bullet_train-billing-usage (1.0.5)
       bullet_train
       rails (>= 6.0)
       verbs
