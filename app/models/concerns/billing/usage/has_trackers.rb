@@ -9,7 +9,7 @@ module Billing::Usage::HasTrackers
 
           # This will grab the most recent tracker for this usage cycle.
           # If it doesn't exist, it will be created. This can happen if developers introduce new usage cycles to track by.
-          order(created_at: :desc).find_or_create_by(duration: duration, interval: interval)
+          order(created_at: :desc).includes(:counts).find_or_create_by(duration: duration, interval: interval)
         end
       end
     end
