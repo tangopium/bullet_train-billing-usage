@@ -8,12 +8,6 @@ class Billing::Usage::Tracker < BulletTrain::Billing::Usage.base_class.constanti
     end
   end
 
-  if ActiveRecord::Base.connection.adapter_name.downcase.include?("mysql")
-    after_initialize do
-      self.usage ||= {}
-    end
-  end
-
   def self.cycles(parent)
     Billing::Usage::ProductCatalog.new(parent).cycles
   end
