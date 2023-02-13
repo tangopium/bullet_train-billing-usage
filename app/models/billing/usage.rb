@@ -4,7 +4,7 @@ module Billing::Usage
   end
 
   def self.trackers
-    ApplicationRecord.descendants.select do |klass|
+    BulletTrain::Billing::Usage.base_class.constantize.descendants.select do |klass|
       klass if klass.include?(Billing::Usage::HasTrackers)
     end.compact
   end

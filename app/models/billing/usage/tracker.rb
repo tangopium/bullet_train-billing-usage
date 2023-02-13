@@ -2,6 +2,12 @@ class Billing::Usage::Tracker < BulletTrain::Billing::Usage.base_class.constanti
   # e.g. `belongs_to :team`
   belongs_to BulletTrain::Billing::Usage.parent_association
 
+  has_many :counts, dependent: :destroy do
+    def for(action, model)
+      order(created_at: :desc).find_by(action: action, name: model.to_s)
+    end
+  end
+
   if ActiveRecord::Base.connection.adapter_name.downcase.include?("mysql")
     after_initialize do
       self.usage ||= {}
@@ -13,10 +19,8 @@ class Billing::Usage::Tracker < BulletTrain::Billing::Usage.base_class.constanti
   end
 
   def track(action, model, count)
-    usage[model.name] ||= {}
-    usage[model.name][action.to_s] ||= 0
-    usage[model.name][action.to_s] += count
-    save
+    count_id = counts.find_or_create_by(action: action, name: model.to_s).id
+    Billing::Usage::Count.update_counters(count_id, count: count, touch: true)
   end
 
   def cycle_as_needed
