@@ -1,7 +1,7 @@
 class MigrateTrackerUsage < ActiveRecord::Migration[7.0]
   def up
     trackers do |tracker|
-      (tracker.usage || {}).map do |model, counts|
+      (tracker&.usage || {}).map do |model, counts|
         counts.map do |action, count|
           tracker.counts.upsert({action: action,
                                  name: model.to_s,
@@ -16,6 +16,7 @@ class MigrateTrackerUsage < ActiveRecord::Migration[7.0]
   def down
     trackers do |tracker|
       tracker.counts.order(created_at: :desc).each do |count|
+        count.tracker.usage ||= {}
         count.tracker.usage[count.name] ||= {}
         count.tracker.usage[count.name][count.action] = count.count
         count.tracker.save
