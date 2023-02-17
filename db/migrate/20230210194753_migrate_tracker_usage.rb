@@ -38,8 +38,8 @@ class MigrateTrackerUsage < ActiveRecord::Migration[7.0]
             .order(created_at: :desc)
             .includes(:counts)
             .find_by(duration: duration, interval: interval)
-        end.each do |tracker|
-          yield tracker
+        end.each do |billing_usage_tracker|
+          yield billing_usage_tracker
         end
       end
     end
