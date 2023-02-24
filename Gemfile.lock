@@ -316,6 +316,8 @@ GEM
     standard (1.16.1)
       rubocop (= 1.35.1)
       rubocop-performance (= 1.14.3)
+    standardrb (1.0.1)
+      standard
     thor (1.2.1)
     thread-local (1.1.0)
     timeout (0.3.1)
@@ -352,6 +354,7 @@ DEPENDENCIES
   pg (~> 1.2.0)
   sprockets-rails
   standard
+  standardrb (~> 1.0)
 
 BUNDLED WITH
-   2.3.20
+   2.3.26
