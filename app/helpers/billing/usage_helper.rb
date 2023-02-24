@@ -36,8 +36,8 @@ module Billing::UsageHelper
     introduction = ["You"]
     introduction << "also" if index > 0
     introduction << "can't"
-    introduction << ((action == :have) ? "add" : action)
-    introduction << ((count == 1) ? "a" : number_with_delimiter(count))
+    introduction << (action == :have ? "add" : action)
+    introduction << (count == 1 ? "a" : number_with_delimiter(count))
     introduction << broken_limits_model_name(model, count: count)
   end
 
@@ -75,7 +75,7 @@ module Billing::UsageHelper
     end
 
     usage << number_with_delimiter(limit[:usage])
-    usage << ((action == :have && count.zero?) ? "of" : "out of")
+    usage << (action == :have && count.zero? ? "of" : "out of")
   end
 
   def broken_soft_limits_usage(limit, count:)
@@ -83,10 +83,10 @@ module Billing::UsageHelper
 
     usage = []
 
-    usage << ((action == :have) ? "used" : action.verb.conjugate(tense: :past))
+    usage << (action == :have ? "used" : action.verb.conjugate(tense: :past))
 
     usage << number_with_delimiter(limit[:usage])
-    usage << ((action == :have && count.zero?) ? "of" : "out of")
+    usage << (action == :have && count.zero? ? "of" : "out of")
   end
 
   def display_unavailable_action?(limit, count)
