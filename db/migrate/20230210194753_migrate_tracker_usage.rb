@@ -7,7 +7,7 @@ class MigrateTrackerUsage < ActiveRecord::Migration[7.0]
                                  name: model.to_s,
                                  tracker_id: tracker,
                                  count: count},
-                                unique_by: [:action, :name, :tracker_id])
+            unique_by: [:action, :name, :tracker_id])
         end
       end
     end
