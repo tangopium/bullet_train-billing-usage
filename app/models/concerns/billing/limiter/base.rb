@@ -29,6 +29,16 @@ module Billing::Limiter::Base
     broken_limits_for(:have, model, enforcement: enforcement.to_s, count: 1).any?
   end
 
+  def exhausted_usage_for(limit, action, model, count: 0)
+    current_count = if action == :have
+      exists_count_for(model)
+    else
+      usage_for(action, model, limit["duration"], limit["interval"]) || 0
+    end
+
+    current_count + count > limit["count"] ? current_count : nil
+  end
+
   def hard_limits_for(action, model)
     limits_for(action, model).select { |limit| limit["enforcement"] == "hard" }
   end
@@ -74,18 +84,6 @@ module Billing::Limiter::Base
 
   def exists_count_for(model)
     @parent.send(collection_for(model)).billable.count
-  end
-
-  def exhausted_usage_for(limit, action, model, count: 0)
-    current_count = if action == :have
-      exists_count_for(model)
-    else
-      usage_for(action, model, limit["duration"], limit["interval"])
-    end
-
-    return nil unless current_count
-
-    current_count + count > limit["count"] ? current_count : nil
   end
 
   def limit_key(model)
