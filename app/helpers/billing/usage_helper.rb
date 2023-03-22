@@ -69,7 +69,7 @@ module Billing::UsageHelper
     usage = []
 
     usage << if action == :have
-      (count.zero? ? "used" : "because you already used up the")
+      (count.zero? ? "used" : "because you've already used the")
     else
       "because you've already #{action.verb.conjugate(tense: :past)}"
     end
