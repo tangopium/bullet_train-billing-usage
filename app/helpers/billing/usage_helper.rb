@@ -69,13 +69,10 @@ module Billing::UsageHelper
     usage = []
 
     usage << if action == :have
-      (count.zero? ? "used" : "because you already have")
+      (count.zero? ? "used" : "because you've already used the")
     else
       "because you've already #{action.verb.conjugate(tense: :past)}"
     end
-
-    usage << number_with_delimiter(limit[:usage])
-    usage << (action == :have && count.zero? ? "of" : "out of")
   end
 
   def broken_soft_limits_usage(limit, count:)
