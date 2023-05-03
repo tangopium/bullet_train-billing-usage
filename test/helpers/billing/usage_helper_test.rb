@@ -21,16 +21,16 @@ class Billing::UsageHelperTest < ActiveSupport::TestCase
       assert_includes message, "You can't add a Membership"
     end
 
-    it "returns the broken limits alongside the current limits" do
+    it "returns the current limit" do
       message = controller.broken_hard_limits_message(limiter, model)
 
-      assert_includes message, "because you already have 3 out of 3 Memberships"
+      assert_includes message, "because you've already used the 3 Memberships allowed"
     end
 
     it "returns a message that you already have if you are not trying to add more" do
       message = controller.broken_hard_limits_message(limiter, model, count: 0)
 
-      assert_includes message, "You've used 3 of 3 Memberships"
+      assert_includes message, "You've used 3 Memberships"
     end
 
     it "returns the product name that had the broken limits" do
@@ -44,7 +44,7 @@ class Billing::UsageHelperTest < ActiveSupport::TestCase
 
       message = controller.broken_hard_limits_message(limiter, model)
 
-      assert_includes message, "You can't create a Membership because you've already created 3 out of 3 Memberships"
+      assert_includes message, "You can't create a Membership because you've already created 3 Memberships"
     end
 
     it "returns the interval if that is specified in the config" do
