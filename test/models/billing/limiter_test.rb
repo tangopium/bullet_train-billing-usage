@@ -59,10 +59,17 @@ class Billing::LimiterTest < ActiveSupport::TestCase
 
     describe "#exhausted_usage_for" do
       let(:limit) { {"count" => 2, "duration" => 1, "interval" => "month"} }
+      let(:unlimited_limit) { {"count" => nil, "duration" => 1, "interval" => "month"} }
 
       it "returns nil if the limit has not been exhausted" do
         Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
           assert_nil limiter.exhausted_usage_for(limit, :create, "Blah")
+        end
+      end
+
+      it "returns nil if the limit can not be exhausted" do
+        Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
+          assert_nil limiter.exhausted_usage_for(unlimited_limit, :create, "Blah")
         end
       end
 

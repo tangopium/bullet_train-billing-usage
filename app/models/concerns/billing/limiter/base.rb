@@ -30,6 +30,10 @@ module Billing::Limiter::Base
   end
 
   def exhausted_usage_for(limit, action, model, count: 0)
+    # If count is nil we treat that as unlimited, and it can't be exhausted
+    if limit["count"].nil?
+      return nil
+    end
     current_count = if action == :have
       exists_count_for(model)
     else
