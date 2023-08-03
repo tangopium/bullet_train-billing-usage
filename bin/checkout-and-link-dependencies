@@ -97,7 +97,7 @@ bundle install
 
 # If we have a db/migrate directory but we do not have a .gemspec (because we're in the starter repo),
 # then we need to copy migrations from some gems into the local migrations
-if [ -d "./db/migrate" ] && [ ! -f "./bullet_train-billing-umbrella_subscriptions.gemspec" ]
+if [ -d "./db/migrate" ] && [ ! -f "./bullet_train-billing-*.gemspec" ]
 then
   cp `bundle show --paths | grep bullet_train-billing | sort | head -n 1`/db/migrate/* db/migrate
   echo "copied migrations from billing"
