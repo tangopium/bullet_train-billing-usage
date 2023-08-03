@@ -71,7 +71,7 @@ ls -al
 
 PRO_DEPENDENCIES=( bullet_train-billing )
 CO_DEPENDENCIES=( bullet_train-core )
-CORE_GEMS=( bullet_train )
+CORE_GEMS=( bullet_train bullet_train-fields bullet_train-has_uuid bullet_train-roles bullet_train-routes bullet_train-scope_validator bullet_train-super_load_and_authorize_resource bullet_train-themes )
 
 mkdir deps
 
