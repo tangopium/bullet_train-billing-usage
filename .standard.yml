@@ -1,0 +1,3 @@
+ignore:
+  # The deps directory isn't present except for in CI, and in CI it can cause problems, so we ignore it.
+  - 'deps/**/*'
