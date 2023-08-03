@@ -15,7 +15,8 @@ function checkout_single_dependency() {
 
   # And get a list of branch names
   BRANCH_NAMES=$(git branch -r)
-  echo "These are the branches on the dependency repo:\n\n${BRANCH_NAMES}"
+  echo "These are the branches on the dependency repo:"
+  echo "${BRANCH_NAMES}"
 
   # Assume that we'll use the main branch if we can't find a match with our current branch
   REPO_BRANCH="main"
@@ -26,13 +27,18 @@ function checkout_single_dependency() {
       break
     fi
   done
-  echo "The branch we're going to use:\n\n${REPO_BRANCH}"
+  echo "The branch we're going to use: ${REPO_BRANCH}"
 
   # Switch to the branch that we need to use
   git switch $REPO_BRANCH
 
   # Get back out of the gem directory
   cd ../..
+}
+
+function link_single_dependency(){
+  local org=$1
+  local dep=$2
 
   # Make a copy of the Gemfile with everything *except* the dependency that we're working with
   grep -v "gem \"$dep\"" Gemfile > Gemfile.tmp
@@ -44,25 +50,47 @@ function checkout_single_dependency() {
   echo "gem \"$dep\", path: \"./deps/$dep\"" >> Gemfile
 }
 
+
+function link_single_dependency_bt_core(){
+  local org=$1
+  local dep=$2
+
+  # Make a copy of the Gemfile with everything *except* the dependency that we're working with
+  grep -v "gem \"$dep\"" Gemfile > Gemfile.tmp
+
+  # Make that the "real" Gemfile
+  mv Gemfile.tmp Gemfile
+
+  # Add back our dependency, but point it at our local copy
+  echo "gem \"$dep\", path: \"./deps/bullet_train-core/$dep\"" >> Gemfile
+}
+
 echo "checking out and linking deps in dir: "
 pwd
 ls -al
 
 PRO_DEPENDENCIES=( bullet_train-billing )
 CO_DEPENDENCIES=( bullet_train-core )
+CORE_GEMS=( bullet_train )
 
 mkdir deps
 
 for dep in "${PRO_DEPENDENCIES[@]}"
 do
   checkout_single_dependency "bullet-train-pro" $dep
+  link_single_dependency "bullet-train-pro" $dep
 done
 
 for dep in "${CO_DEPENDENCIES[@]}"
 do
   checkout_single_dependency "bullet-train-co" $dep
+  for dep in "${CORE_GEMS[@]}"
+  do
+    link_single_dependency_bt_core "bullet-train-co" $dep
+  done
 done
 
+cat Gemfile
 
 bundle install
 
