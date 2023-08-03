@@ -69,8 +69,6 @@ jobs:
     steps:
       - checkout
 
-      - run: bin/checkout-and-link-dependencies
-
       # TODO Figure out how to make these work for `tmp/starter`
       # # Restore dependency caches
       # - restore_cache: *restore_bundler_cache
