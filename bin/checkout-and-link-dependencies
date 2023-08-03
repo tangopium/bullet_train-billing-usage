@@ -115,5 +115,5 @@ then
 
   # And use our own copies of a couple of files
   #cp ../../test/fixtures/files/roles.yml config/models/roles.yml
-  cp ../../test/fixtures/files/products.yml config/models/billing/products.yml
+  #cp ../../test/fixtures/files/products.yml config/models/billing/products.yml
 fi
