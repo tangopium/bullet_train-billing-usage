@@ -20,9 +20,9 @@ class Billing::LimiterTest < ActiveSupport::TestCase
       [
         OpenStruct.new(id: "basic",
           limits: {"blahs" => {"create" => {"count" => 2,
-                                          "enforcement" => "hard",
-                                          "duration" => 1,
-                                          "interval" => "month"}}}),
+                                            "enforcement" => "hard",
+                                            "duration" => 1,
+                                            "interval" => "month"}}}),
         OpenStruct.new(id: "upgrade",
           limits: {"blahs" => {"create" => {"count" => 3,
                                             "enforcement" => "hard",
@@ -32,7 +32,7 @@ class Billing::LimiterTest < ActiveSupport::TestCase
     end
   end
 
-  describe "with a stubbed product catalog" do
+  describe "with a stubbed product catalog of a single limit" do
     let(:all_products) { limiter.current_products }
     let(:limiter) { TestLimiter.new(team) }
     let(:team) { FactoryBot.create(:team) }
@@ -90,7 +90,6 @@ class Billing::LimiterTest < ActiveSupport::TestCase
             end
           end
         end
-
 
         describe "when we are surpassing the higher limit" do
           it "returns the broken limit" do
