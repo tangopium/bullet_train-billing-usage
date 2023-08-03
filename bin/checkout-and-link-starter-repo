@@ -39,9 +39,15 @@ do
   echo "gem \"$package\", path: \"../..\"" >> Gemfile
 done
 
+cat Gemfile
+echo "------"
+
+pwd
+ls -al
+
 updates="${packages[@]}"
 
 # TODO Not 100% sure on this, but to get CI working we had to replace this.
 # bundle lock --update $updates
 
-bundle install
+#bundle install
