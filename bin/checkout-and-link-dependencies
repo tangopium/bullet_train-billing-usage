@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+
+function checkout_single_dependency() {
+  local org=$1
+  local dep=$2
+
+  # First we clone the repo
+  # TODO: Eventually we may want to shallow clone for this first step, and then pull down the branch that we need.
+  # This is currently cloning the entire repo with full history and all branches. Most of the BT Pro repos are fairly
+  # small at this point, so it's not a HUGE inefficiency, but it could definitely be better.
+  git clone https://github.com/$org/$dep.git ./deps/$dep
+
+  # Now go into the newly cloned repo
+  cd deps/$dep
+
+  # And get a list of branch names
+  BRANCH_NAMES=$(git branch -r)
+  echo "These are the branches on the dependency repo:"
+  echo "${BRANCH_NAMES}"
+
+  # Assume that we'll use the main branch if we can't find a match with our current branch
+  REPO_BRANCH="main"
+  for BRANCH in $BRANCH_NAMES; do
+    if [ ${BRANCH} == "origin/$CIRCLE_BRANCH" ]
+    then
+      REPO_BRANCH=$CIRCLE_BRANCH
+      break
+    fi
+  done
+  echo "The branch we're going to use: ${REPO_BRANCH}"
+
+  # Switch to the branch that we need to use
+  git switch $REPO_BRANCH
+
+  # Get back out of the gem directory
+  cd ../..
+}
+
+function link_single_dependency(){
+  local org=$1
+  local dep=$2
+
+  # Make a copy of the Gemfile with everything *except* the dependency that we're working with
+  grep -v "gem \"$dep\"" Gemfile > Gemfile.tmp
+
+  # Make that the "real" Gemfile
+  mv Gemfile.tmp Gemfile
+
+  # Add back our dependency, but point it at our local copy
+  echo "gem \"$dep\", path: \"./deps/$dep\"" >> Gemfile
+}
+
+
+function link_single_dependency_bt_core(){
+  local org=$1
+  local dep=$2
+
+  # Make a copy of the Gemfile with everything *except* the dependency that we're working with
+  grep -v "gem \"$dep\"" Gemfile > Gemfile.tmp
+
+  # Make that the "real" Gemfile
+  mv Gemfile.tmp Gemfile
+
+  # Add back our dependency, but point it at our local copy
+  echo "gem \"$dep\", path: \"./deps/bullet_train-core/$dep\"" >> Gemfile
+}
+
+echo "checking out and linking deps in dir: "
+pwd
+ls -al
+
+PRO_DEPENDENCIES=( bullet_train-billing )
+CO_DEPENDENCIES=( bullet_train-core )
+CORE_GEMS=( bullet_train bullet_train-fields bullet_train-has_uuid bullet_train-roles bullet_train-scope_validator bullet_train-super_load_and_authorize_resource bullet_train-themes )
+
+mkdir deps
+
+for dep in "${PRO_DEPENDENCIES[@]}"
+do
+  checkout_single_dependency "bullet-train-pro" $dep
+  link_single_dependency "bullet-train-pro" $dep
+done
+
+for dep in "${CO_DEPENDENCIES[@]}"
+do
+  checkout_single_dependency "bullet-train-co" $dep
+  for dep in "${CORE_GEMS[@]}"
+  do
+    link_single_dependency_bt_core "bullet-train-co" $dep
+  done
+done
+
+cat Gemfile
+
+bundle install
+
+echo "----------"
+pwd
+echo "----------"
+ls -al
+echo "----------"
+
+# If we have a db/migrate directory but we do not have a .gemspec (because we're in the starter repo),
+# then we need to copy migrations from some gems into the local migrations
+if [ -d "./db/migrate" ] && [ ! -f "./bullet_train-billing-usage.gemspec" ]
+then
+  cp `bundle show --paths | grep bullet_train-billing | sort | head -n 1`/db/migrate/* db/migrate
+  echo "copied migrations from billing"
+  # TODO: Why is it not finding any migrations for stripe?
+  #cp `bundle show --paths | grep bullet_train-billing-stripe | sort | head -n 1`/db/migrate/* db/migrate
+  #echo "copied migrations from stripe"
+  # TODO: Why is it not finding any migrations for umbrella_subscriptions?
+  #cp `bundle show --paths | grep bullet_train-billing-umbrella_subscriptions | sort | head -n 1`/db/migrate/* db/migrate
+  # Oh, maybe because umbrella_subscriptions is the main gem that we're dealing with and so it lives in a
+  # directory that doesn't contain it's name? I think it lives in /home/circleci/project. Maybe this'll work...
+  cp /home/circleci/project/db/migrate/* db/migrate
+
+  # And we also need to generate the system test
+  ./bin/rails g bullet_train:billing:umbrella_subscriptions:system_test
+
+  # And use our own copies of a couple of files
+  #cp ../../test/fixtures/files/roles.yml config/models/roles.yml
+  #cp ../../test/fixtures/files/products.yml config/models/billing/products.yml
+fi

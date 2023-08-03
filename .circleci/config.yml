@@ -69,6 +69,8 @@ jobs:
     steps:
       - checkout
 
+      - run: bin/checkout-and-link-dependencies
+
       # TODO Figure out how to make these work for `tmp/starter`
       # # Restore dependency caches
       # - restore_cache: *restore_bundler_cache
@@ -109,6 +111,7 @@ jobs:
           command: rm LICENSE.chromedriver
 
       - run: ../../bin/checkout-and-link-starter-repo
+      - run: ../../bin/checkout-and-link-dependencies
 
       - restore_cache: *restore_bundler_cache
       - run: bundle install
@@ -125,9 +128,11 @@ jobs:
 
       - *wait_for_docker
 
+      - run: ./bin/rails db:migrate
+
       - run:
           name: Run tests with Knapsack Pro
-          command: bundle exec rails "knapsack_pro:queue:minitest[--verbose]"
+          command: bundle exec rails "knapsack_pro:queue:minitest[--verbose -b]"
           environment:
             RAILS_ENV: test
             KNAPSACK_PRO_CI_NODE_TOTAL: 16
@@ -170,6 +175,7 @@ jobs:
           command: rm LICENSE.chromedriver
 
       - run: ../../bin/checkout-and-link-starter-repo
+      - run: ../../bin/checkout-and-link-dependencies
 
       - restore_cache: *restore_bundler_cache
       - run: bundle install
@@ -185,6 +191,8 @@ jobs:
       # - restore_cache: *restore_yarn_cache
 
       - *wait_for_docker
+
+      - run: ./bin/rails db:migrate
 
       - run: "bundle add spring"
       - run:
