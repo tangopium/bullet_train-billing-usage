@@ -92,7 +92,7 @@ module Billing::Limiter::Base
     # most permissive limit wins out
     limits = limits_for(action, model, enforcement: enforcement)
 
-    if limits.any?{|limit| limit.has_key?("count") && limit["count"].nil? }
+    if limits.any? { |limit| limit.has_key?("count") && limit["count"].nil? }
       # a nil count represents unlimited
       []
     else
