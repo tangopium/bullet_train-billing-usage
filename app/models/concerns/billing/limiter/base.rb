@@ -44,12 +44,12 @@ module Billing::Limiter::Base
   end
 
   def hard_limits_for(action, model)
-    limits_for(action, model).select { |limit| limit["enforcement"] == "hard" }
+    limits_for(action, model, enforcement: "hard")
   end
 
-  def limits_for(action, model)
+  def limits_for(action, model, enforcement: nil)
     # Collect any relevant limits from all active products.
-    current_products.map do |product|
+    all_limits = current_products.map do |product|
       limits = product.respond_to?(:limits) && product.limits.present? ? (product.limits[limit_key(model)] || {}) : {}
       limits.each do |action, limit|
         limit["product_id"] = product.id
@@ -58,32 +58,46 @@ module Billing::Limiter::Base
     end.compact.map do |limits_by_action|
       limits_by_action[action.to_s]
     end.compact
+
+    if enforcement.present?
+      all_limits.select { |limit| limit["enforcement"] == enforcement.to_s }
+    else
+      all_limits
+    end
   end
 
   private
 
   def broken_limits_for(action, model, enforcement:, count: 1)
-    limits = enforced_limits_for(action, model, enforcement: enforcement).map do |limit|
+    limit = enforced_limit_for(action, model, enforcement: enforcement)
+
+    [].tap do |exceeded_limits|
       if (exhausted_usage = exhausted_usage_for(limit, action, model, count: count))
         # We notate the action here because `:create` ends up aggregating broken limits for both `:create` and `:have`.
-        {action: action, usage: exhausted_usage, limit: limit}
+        exceeded_limits << {action: action, usage: exhausted_usage, limit: limit}
       end
-    end.compact
 
-    # If we're checking whether we can create something, we also need to check if it can exist.
-    if action == :create
-      limits += broken_limits_for(:have, model, enforcement: enforcement, count: count)
+      # If we're checking whether we can create something, we also need to check if it can exist.
+      if action == :create
+        exceeded_limits << broken_limits_for(:have, model, enforcement: enforcement, count: count)
+      end
     end
-
-    limits
   end
 
   def collection_for(model)
     limit_key(model).underscore.to_sym
   end
 
-  def enforced_limits_for(action, model, enforcement:)
-    limits_for(action, model).select { |limit| limit["enforcement"].to_s == enforcement.to_s }
+  def enforced_limit_for(action, model, enforcement:)
+    # most permissive limit wins out
+    limits = limits_for(action, model, enforcement: enforcement)
+
+    if limits.any? { |limit| limit.has_key?("count") && limit["count"].nil? }
+      # a nil count represents unlimited
+      []
+    else
+      limits.max_by { |limit| limit["count"] }
+    end
   end
 
   def exists_count_for(model)
