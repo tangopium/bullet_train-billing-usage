@@ -57,6 +57,14 @@ class Billing::LimiterTest < ActiveSupport::TestCase
     let(:team) { FactoryBot.create(:team) }
 
     describe "#broken_hard_limits_for" do
+      describe "asking for limits for something that is not limited" do
+        it "returns an empty array for no broken hard limits" do
+          Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
+            assert_empty limiter.broken_hard_limits_for(:create, "SOMETHING WE DO NOT LIMIT")
+          end
+        end
+      end
+
       it "returns an empty array for no broken hard limits" do
         Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
           assert_empty limiter.broken_hard_limits_for(:create, "Blah")
