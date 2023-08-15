@@ -85,7 +85,8 @@ class Billing::LimiterTest < ActiveSupport::TestCase
       end
 
       it "returns the broken limits if they are broken" do
-        FactoryBot.create(:tracker, team: team, interval: "month", duration: 1)
+        tracker = FactoryBot.create(:tracker, team: team, interval: "month", duration: 1)
+        FactoryBot.create(:count, tracker: tracker, action: "created", name: "Blah", count: 2)
 
         Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
           assert_equal limiter.broken_hard_limits_for(:create, "Blah"), [
@@ -120,7 +121,7 @@ class Billing::LimiterTest < ActiveSupport::TestCase
             Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
               assert_equal limiter.broken_hard_limits_for(:have, "Billing::Usage::Tracker"), [
                 {action: :have,
-                  usage: 2,
+                  usage: 1,
                   limit: {"count" => 1,
                           "enforcement" => "hard",
                           "duration" => 1,
