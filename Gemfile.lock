@@ -115,7 +115,7 @@ GEM
       unicode-emoji
       valid_email
       xxhash
-    bullet_train-billing (1.0.7)
+    bullet_train-billing (1.0.9)
       bullet_train
       rails (>= 6.0)
     bullet_train-fields (1.2.27)
