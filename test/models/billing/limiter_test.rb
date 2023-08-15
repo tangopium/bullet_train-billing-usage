@@ -115,7 +115,7 @@ class Billing::LimiterTest < ActiveSupport::TestCase
 
         describe "cannot have" do
           it "returns the broken limits" do
-            tracker = FactoryBot.create(:tracker, team: team, interval: "month", duration: 1)
+            FactoryBot.create(:tracker, team: team, interval: "month", duration: 1)
 
             Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
               assert_equal limiter.broken_hard_limits_for(:have, "Billing::Usage::Tracker"), [
