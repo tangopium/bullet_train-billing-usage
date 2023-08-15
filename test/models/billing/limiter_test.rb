@@ -13,6 +13,18 @@ class Billing::LimiterTest < ActiveSupport::TestCase
     end
   end
 
+  class TestForHaveLimiter
+    include Billing::Limiter::Base
+
+    def current_products
+      [OpenStruct.new(id: "basic",
+        limits: {"billing_usage_trackers" => {"have" => {"count" => 1,
+                                                         "enforcement" => "hard",
+                                                         "duration" => 1,
+                                                         "interval" => "month"}}})]
+    end
+  end
+
   class MultipleProductTestLimiter
     include Billing::Limiter::Base
 
@@ -88,17 +100,35 @@ class Billing::LimiterTest < ActiveSupport::TestCase
         end
       end
 
-      it "returns the broken limits if they could be broken by the count" do
-        Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
-          assert_equal limiter.broken_hard_limits_for(:create, "Blah", count: 3), [
-            {action: :create,
-             usage: 0,
-             limit: {"count" => 2,
-                     "enforcement" => "hard",
-                     "duration" => 1,
-                     "interval" => "month",
-                     "product_id" => "basic"}}
-          ]
+      describe "have" do
+        let(:all_products) { limiter.current_products }
+        let(:limiter) { TestForHaveLimiter.new(team) }
+        let(:team) { FactoryBot.create(:team) }
+
+        describe "can have" do
+          it "returns an empty array for no broken hard limits" do
+            Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
+              assert_empty limiter.broken_hard_limits_for(:have, "Billing::Usage::Tracker")
+            end
+          end
+        end
+
+        describe "cannot have" do
+          it "returns the broken limits" do
+            FactoryBot.create(:tracker, team: team, interval: "month", duration: 1)
+
+            Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
+              assert_equal limiter.broken_hard_limits_for(:have, "Billing::Usage::Tracker"), [
+                {action: :have,
+                 usage: 1,
+                 limit: {"count" => 1,
+                         "enforcement" => "hard",
+                         "duration" => 1,
+                         "interval" => "month",
+                         "product_id" => "basic"}}
+              ]
+            end
+          end
         end
       end
 

@@ -2,6 +2,9 @@ class Billing::Usage::Tracker < BulletTrain::Billing::Usage.base_class.constanti
   # e.g. `belongs_to :team`
   belongs_to BulletTrain::Billing::Usage.parent_association
 
+  # just for specs
+  scope :billable, -> { all }
+
   has_many :counts, dependent: :destroy do
     def for(action, model)
       order(created_at: :desc).find_by(action: action, name: model.to_s)
