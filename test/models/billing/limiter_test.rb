@@ -98,35 +98,35 @@ class Billing::LimiterTest < ActiveSupport::TestCase
                      "product_id" => "basic"}}
           ]
         end
+      end
 
-        describe "have" do
-          let(:all_products) { limiter.current_products }
-          let(:limiter) { TestForHaveLimiter.new(team) }
-          let(:team) { FactoryBot.create(:team) }
+      describe "have" do
+        let(:all_products) { limiter.current_products }
+        let(:limiter) { TestForHaveLimiter.new(team) }
+        let(:team) { FactoryBot.create(:team) }
 
-          describe "can have" do
-            it "returns an empty array for no broken hard limits" do
-              Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
-                assert_empty limiter.broken_hard_limits_for(:have, "Billing::Usage::Tracker")
-              end
+        describe "can have" do
+          it "returns an empty array for no broken hard limits" do
+            Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
+              assert_empty limiter.broken_hard_limits_for(:have, "Billing::Usage::Tracker")
             end
           end
+        end
 
-          describe "cannot have" do
-            it "returns the broken limits" do
-              tracker = FactoryBot.create(:tracker, team: team, interval: "month", duration: 1)
+        describe "cannot have" do
+          it "returns the broken limits" do
+            tracker = FactoryBot.create(:tracker, team: team, interval: "month", duration: 1)
 
-              Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
-                assert_equal limiter.broken_hard_limits_for(:have, "Billing::Usage::Tracker"), [
-                  {action: :have,
-                   usage: 2,
-                   limit: {"count" => 1,
-                           "enforcement" => "hard",
-                           "duration" => 1,
-                           "interval" => "month",
-                           "product_id" => "basic"}}
-                ]
-              end
+            Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
+              assert_equal limiter.broken_hard_limits_for(:have, "Billing::Usage::Tracker"), [
+                {action: :have,
+                  usage: 2,
+                  limit: {"count" => 1,
+                          "enforcement" => "hard",
+                          "duration" => 1,
+                          "interval" => "month",
+                          "product_id" => "basic"}}
+              ]
             end
           end
         end

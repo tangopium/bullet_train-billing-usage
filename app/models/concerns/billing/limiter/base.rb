@@ -74,7 +74,7 @@ module Billing::Limiter::Base
     [].tap do |exceeded_limits|
       if limit && (exhausted_usage = exhausted_usage_for(limit, action, model, count: count))
         # We notate the action here because `:create` ends up aggregating broken limits for both `:create` and `:have`.
-        exceeded_limits.concat({action: action, usage: exhausted_usage, limit: limit})
+        exceeded_limits.push({action: action, usage: exhausted_usage, limit: limit})
       end
 
       # If we're checking whether we can create something, we also need to check if it can exist.
