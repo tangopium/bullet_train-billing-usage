@@ -19,12 +19,11 @@ class Billing::LimiterTest < ActiveSupport::TestCase
     def current_products
       [OpenStruct.new(id: "basic",
         limits: {"billing_usage_trackers" => {"have" => {"count" => 1,
-                                          "enforcement" => "hard",
-                                          "duration" => 1,
-                                          "interval" => "month"}}})]
+                                                         "enforcement" => "hard",
+                                                         "duration" => 1,
+                                                         "interval" => "month"}}})]
     end
   end
-
 
   class MultipleProductTestLimiter
     include Billing::Limiter::Base
@@ -121,12 +120,12 @@ class Billing::LimiterTest < ActiveSupport::TestCase
             Billing::Usage::ProductCatalog.stub(:all_products, all_products) do
               assert_equal limiter.broken_hard_limits_for(:have, "Billing::Usage::Tracker"), [
                 {action: :have,
-                  usage: 1,
-                  limit: {"count" => 1,
-                          "enforcement" => "hard",
-                          "duration" => 1,
-                          "interval" => "month",
-                          "product_id" => "basic"}}
+                 usage: 1,
+                 limit: {"count" => 1,
+                         "enforcement" => "hard",
+                         "duration" => 1,
+                         "interval" => "month",
+                         "product_id" => "basic"}}
               ]
             end
           end
