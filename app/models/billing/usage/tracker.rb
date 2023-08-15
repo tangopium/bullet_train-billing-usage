@@ -2,7 +2,10 @@ class Billing::Usage::Tracker < BulletTrain::Billing::Usage.base_class.constanti
   # e.g. `belongs_to :team`
   belongs_to BulletTrain::Billing::Usage.parent_association
 
-  # just for specs
+  # TODO: This is only here to satify a test in `limiter_test.rb` that is testing a
+  # scenario that we belive isn't actualy a valid use-case. That is, people won't be
+  # actually limiting trackers. That test should probably be located in the starter
+  # repo so that it has access to other models. Move that test and then remove this scope.
   scope :billable, -> { all }
 
   has_many :counts, dependent: :destroy do

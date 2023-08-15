@@ -16,6 +16,11 @@ class Billing::LimiterTest < ActiveSupport::TestCase
   class TestForHaveLimiter
     include Billing::Limiter::Base
 
+    # TODO: This setup isn't a valid use-case. People won't actually limit trackers
+    # in this way, and testing the `have` limiter like this means that we had to
+    # introduce code into the `Tracker` model just to satisfy this test. These
+    # tests should probably be in the starter-repo. Move the tests and the remove
+    # the `billable` scope in the `Tracker` model.
     def current_products
       [OpenStruct.new(id: "basic",
         limits: {"billing_usage_trackers" => {"have" => {"count" => 1,
