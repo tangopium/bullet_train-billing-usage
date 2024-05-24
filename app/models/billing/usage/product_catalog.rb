@@ -9,6 +9,7 @@ class Billing::Usage::ProductCatalog
 
   def current_products
     products = parent.team.billing_subscriptions.active.map(&:included_prices).flatten.map(&:price).compact.map(&:product)
+    products = parent.team.billing_subscriptions.active.map(&:product) if products.empty?
     products.any? ? products : free_products
   end
 
